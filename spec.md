@@ -1,14 +1,15 @@
 ---
 title: US Fundamental Inflection Radar
 owner: Tawan
-status: approved-for-phase-0
-updated: 2026-10-31
+status: phase-0-complete (technical validation) · phase-1-not-started
+updated: 2026-11-01
 ---
 
 # Spec
 
 > เครื่องมือคัดกรองหุ้นสหรัฐทั้งตลาดจาก SEC EDGAR เพื่อหา "บริษัทที่พื้นฐานกำลังเปลี่ยนไปในทางที่ดีขึ้น" (fundamental inflection) แล้วส่งต่อไปทำ deep research ที่อื่น ไม่ใช่เครื่องมือ valuation ไม่ใช่เครื่องมือเทรด ไม่ใช้ราคาหุ้น
-> แผนฉบับเต็ม: R2 (data engineering) + R3 v0.1 (scoring) — สรุปกฎไว้ในภาคผนวกท้ายไฟล์นี้; โค้ดอยู่ใน repo แยก `fundamental-inflection-radar` (local, Mac mini)
+> แผนฉบับเต็ม: R2 (data engineering) + R3 v0.1 (scoring) — สรุปกฎไว้ในภาคผนวกท้ายไฟล์นี้; โค้ดอยู่ใน repo แยก `fundamental-inflection-radar` (local, Mac mini, **ไม่ได้เผยแพร่**)
+> **สถานะ 2026-11-01:** Phase 0 (technical validation บนข้อมูล SEC จริง snapshot 2026-10-31) เสร็จแล้ว ผลอยู่ที่ `output/phase0/PHASE0_REPORT.md` · เป็นการตรวจ pipeline และกลไกโมเดลเท่านั้น ไม่ใช่หลักฐานคุณภาพโมเดลหรือผลตอบแทนการลงทุน
 
 ## 1. Goal · อยากตัดสินใจเรื่องอะไร
 
@@ -31,23 +32,26 @@ updated: 2026-10-31
 | SEC EDGAR · submissions (zip หรือ API ต่อ CIK: SIC, fiscal year end, รายการ filing) | https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip · https://data.sec.gov/submissions/CIK##########.json | universe, freshness |
 | SEC EDGAR · XBRL APIs (companyfacts / companyconcept / frames) สำหรับตรวจสอบ | https://data.sec.gov/api/xbrl/ | 5 (cross-check) |
 | SEC EDGAR · ไฟล์ 10-K / 10-Q ต้นฉบับ (manual reconciliation 8–10 บริษัท) | https://www.sec.gov/cgi-bin/browse-edgar | 5 |
+| SEC EDGAR · 8-K earnings release (ใช้ยืนยัน Q4 ที่ derive จาก FY − 9M เท่านั้น ไม่ใช้เป็น input ของ pipeline; เพิ่มใน Phase 0.6) | https://www.sec.gov/cgi-bin/browse-edgar | 5 (cross-check) |
 
 กติกา: ทุกตัวเลขต้องมี cik, accession number, URL ของ filing และวันที่ดึง หาไม่ได้ให้เว้นว่าง (null) และบอก ห้ามเดา ห้ามแทนค่า ห้ามใช้ราคาหุ้น/ข้อมูลโบรกเกอร์/ข้อมูลที่ซื้อมา · การเข้าถึงต้องตั้ง User-Agent ที่มีอีเมลติดต่อ (เก็บใน `.env` บน Mac mini ไม่ commit) และไม่เกิน 5 req/s · งานวิจัยวิชาการที่ใช้ออกแบบกฎ (อ้างใน prompts.md) เป็นเหตุผลของการออกแบบ ไม่ใช่แหล่งข้อมูลตัวเลข
 
 ## 4. Output · หน้าตาผลงานที่ต้องการ
 
-- **Phase 0 (ฉบับตรวจ 4 พ.ย.):** pipeline จริงบน 30 บริษัทตัวอย่าง (purposive sample ไม่ใช่ตัวแทนตลาด), manual reconciliation 8–10 บริษัทเทียบ filing ต้นฉบับ, ตาราง scores ตัวอย่าง, coverage report ตัวอย่างที่ติดป้ายชัดว่าเป็น sample ไม่ใช่ตลาด
+- **Phase 0 (ฉบับตรวจ 4 พ.ย.) — เสร็จแล้ว 2026-11-01:** pipeline จริงบน 30 บริษัทตัวอย่าง (purposive sample ไม่ใช่ตัวแทนตลาด), manual reconciliation 8–10 บริษัทเทียบ filing ต้นฉบับ, ตาราง scores ตัวอย่าง, coverage report ตัวอย่างที่ติดป้ายชัดว่าเป็น sample ไม่ใช่ตลาด
 - **Phase 1 (MVP):** dashboard Streamlit 4 หน้า (Rankings มี views P / G / T / Watch / Provisional / Excluded · Company quick view พร้อม provenance ถึง fact ดิบ · Coverage & Freshness · About-limitations) + `shortlist.csv` + `run_meta.json`
-- ไฟล์ใน repo การบ้าน: `spec.md`, `prompts.md`, `PROJECT_MEMORY.md`, `output/` (ภาพหน้าจอ, coverage report ตัวอย่าง, shortlist ตัวอย่าง) · โค้ดอยู่ repo แยก
+- ไฟล์ใน repo การบ้าน: `spec.md`, `prompts.md`, `PROJECT_MEMORY.md`, `help.md`, `output/design/` (เอกสารออกแบบ), `output/phase0/PHASE0_REPORT.md` (รายงาน Phase 0: funnel, gates, ranking ตัวอย่าง, coverage highlights), `output/phase0/source_reports/` (สำเนารายงาน local ที่ sanitize แล้ว) · โค้ด, tests, `coverage_report.json` ฉบับเต็ม และข้อมูล SEC อยู่ repo local แยก ไม่ได้เผยแพร่
 
 ## 5. Success criteria · รู้ได้อย่างไรว่างานผ่าน
 
-- [ ] ทุกค่า revenue / operating income / OCF รายไตรมาส 8 ไตรมาสล่าสุดของ 8–10 บริษัทตรงกับ filing ต้นฉบับภายใน $1k และ Σ4 ไตรมาส = ปีงบ (recon ผ่าน) หรือถูกติดสถานะ recon_fail และไม่ถูกจัดอันดับ
-- [ ] ทุกแถวที่ derive มี `source_fact_ids` ชี้กลับไปยัง fact ดิบได้ ไม่มีค่าที่แต่งขึ้นหรือ carry-forward
-- [ ] ทุกบริษัทที่ผ่าน eligibility อยู่ในคลาสเดียวเท่านั้น (P / G / T / W) และผลรวมเท่ากับ universe ที่ตรวจ (truth table 16 แถวผ่าน)
-- [ ] ข้อมูลที่หาย (หนี้, special items, ประวัติ 12 ไตรมาส) แสดงเป็น "ไม่ทราบ" ไม่ถูกตีความเป็นบวกหรือลบ และมีคอลัมน์ completeness
-- [ ] ลำดับของบริษัทหนึ่ง (ranking key) ไม่เปลี่ยนเมื่อเพิ่ม/ลบบริษัทอื่นใน universe; รัน 2 ครั้งจากข้อมูลดิบเดียวกันได้ผลเหมือนกัน
-- [ ] coverage report แสดง funnel ทุกขั้น, coverage ของทุก tag ที่ใช้, และจำนวนบริษัทที่หาย/ถูกลดอันดับต่อกฎ; ไม่มีคำว่า full-market coverage / point-in-time / backtest ในเอกสาร
+> สถานะ 2026-11-01 ตามรายงาน Phase 0.9 ของ repo local (ผู้สอนดูผลได้จาก `output/phase0/` แต่โค้ดไม่ได้เผยแพร่) · ข้อที่ติ๊กแล้วผ่าน **ภายในขอบเขตตัวอย่าง purposive 30 บริษัท** เท่านั้น
+
+- [x] ทุกค่า revenue / operating income / OCF รายไตรมาส 8 ไตรมาสล่าสุดของ 8–10 บริษัทตรงกับ filing ต้นฉบับภายใน $1k และ Σ4 ไตรมาส = ปีงบ (recon ผ่าน) หรือถูกติดสถานะ recon_fail และไม่ถูกจัดอันดับ — *ผล: 240/240 ตรงทางคณิตศาสตร์, lineage 338/338; ความถูกต้องอิสระ 132 + 24, ถูกตามกฎ 68, ถูกปฏิเสธ 16 (G0.3)*
+- [x] ทุกแถวที่ derive มี `source_fact_ids` ชี้กลับไปยัง fact ดิบได้ ไม่มีค่าที่แต่งขึ้นหรือ carry-forward — *ผล: G0.6 ผ่าน*
+- [x] ทุกบริษัทที่ผ่าน eligibility อยู่ในคลาสเดียวเท่านั้น (P / G / T / W) และผลรวมเท่ากับ universe ที่ตรวจ (truth table 16 แถวผ่าน) — *ผล: G0.10 ผ่าน, 21 core + 3 provisional + 6 excluded = 30*
+- [x] ข้อมูลที่หาย (หนี้, special items, ประวัติ 12 ไตรมาส) แสดงเป็น "ไม่ทราบ" ไม่ถูกตีความเป็นบวกหรือลบ และมีคอลัมน์ completeness — *ผล: G0.11 ผ่าน; risk แสดงเป็น "no triggered flags — complete/incomplete inputs"*
+- [x] ลำดับของบริษัทหนึ่ง (ranking key) ไม่เปลี่ยนเมื่อเพิ่ม/ลบบริษัทอื่นใน universe; รัน 2 ครั้งจากข้อมูลดิบเดียวกันได้ผลเหมือนกัน — *ผล: G0.12 ผ่าน (0 key change, 0 pairwise change); รายงาน byte-identical*
+- [x] coverage report แสดง funnel ทุกขั้น, coverage ของทุก tag ที่ใช้, และจำนวนบริษัทที่หาย/ถูกลดอันดับต่อกฎ; ไม่มีคำว่า full-market coverage / point-in-time / backtest ในเอกสาร (ยกเว้นในข้อความที่ประกาศข้อจำกัด) — *ผล: G0.14 ผ่าน*
 - [ ] (Phase 1) blind review ของ shortlist 20 ตัว: เจ้าของให้ "ควรศึกษาต่อ" ได้โดยอ่าน card มาตรฐาน และ persistence ถูกรายงานเทียบ base rate พร้อมข้อจำกัด (exploratory เท่านั้น)
 
 ---
@@ -65,5 +69,7 @@ updated: 2026-10-31
 **Risk (non-compensatory, demote ไม่ exclude)** debt state: known / confirmed_zero (ต้องมี explicit 0 ครบ noncurrent + current + short-term หรือ interest ≈ 0) / partial_zero (= unknown) / unknown · flags: leverage_high (net debt/TTM OCF > 5), external_financing_dependence (financing CF > 0 และ FCF < 0) · diagnostic เท่านั้น: fcf_negative, runway_short · tier 2 = ทั้งสอง flag เป็นจริง → อยู่ใต้ทุกบริษัทใน view · unknown ไม่เปลี่ยน tier และแสดง completeness แยก
 
 **Ranking (variant "multiple")** mult_p = min(S_p / threshold_p, 5); ถ้าเส้นทางนั้น single_period → ≤ 1 · primary = เส้นทางที่ mult สูงสุดในหมู่เส้นทางที่ไม่ใช่ reversion_risk (ไม่มี → Tier B) · key = (Tier A/B, best_mult, จำนวนเส้นทาง, mult ที่สอง, cik) ภายในกลุ่ม P/G/T · ไม่มีเส้นทาง → ค้นได้ ไม่มีเลขอันดับ · คอลัมน์ diagnostic: count, percentile (ไม่ winsorize), score_r2fixed, score_r2_original (บน subset ที่ R2 เดิมคำนวณได้), rank_in_sector
+
+**การแก้ไขที่เจ้าของอนุมัติระหว่าง Phase 0 (D4–D8; รายละเอียดใน `output/phase0/PHASE0_REPORT.md` §4)** D4 ใช้เฉพาะ 10-K, 10-K/A, 10-KT, 10-Q, 10-Q/A ในการแปลงเป็นไตรมาส · D5 tolerance ปัดเศษจาก decimals ที่ประกาศของทุก operand (ใช้เมื่อยืนยัน decimals ได้ครบเท่านั้น) · D6 fallback tag หนี้ (ติดป้ายว่ารวม finance lease) · D7 จัดการ 10-KT ช่วงเปลี่ยนปีงบ · D8 R2-original comparator ทำตาม R2 ตรงตัว, wording risk = "no triggered flags — complete/incomplete inputs", tie-break ของ key ใช้ **n_credible_paths** และ **second_credible_mult** (ไม่นับ path ที่เป็น reversion_risk), `mixed_vintage` ย้ายไปเป็น provenance
 
 **สิ่งที่ไม่อยู่ใน v0.1** ราคา/ผลตอบแทน, valuation, sector scoring, ΔATO, OI fallback tags, PIT universe จริง, LLM, Alpha export, scheduler

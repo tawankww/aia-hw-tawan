@@ -66,3 +66,66 @@ Execution sequence: Proceed with steps 0.1–0.3 first.
   - ตัวอย่าง 30 บริษัทเป็น purposive sample สำหรับ validate pipeline ไม่ใช่ตัวแทนตลาด; coverage ของตลาดต้องวัดใน Phase 1
   - ฉบับตรวจ 4 พ.ย. = Phase 0 + coverage report ตัวอย่าง (ติดป้ายชัด) เพราะ Phase 1 ไม่น่าทันและไม่ลด mission
 - **ขั้นต่อไป:** ขั้น 0.2–0.3 บน Mac mini ผ่าน Remote Control: init repo `fundamental-inflection-radar` ใต้ Projects, config.yaml, ตรวจ SEC endpoints + User-Agent, พิมพ์ distinct exchange labels, วัด submissions zip vs API บน 30 CIK แล้วรายงานผลก่อน normalization (session cloud เข้า sec.gov ไม่ได้ จึงต้องรันบนเครื่อง)
+
+---
+
+## รอบ 2 · 2026-11-01
+
+- **ทำอะไร:** รวมผล Phase 0 (ขั้น 0.2–0.9) ที่ทำเสร็จบน Mac mini ใน repo โค้ด local แยก เข้ามาเป็นชุดส่งตรวจ Phase 0 ฉบับสุดท้ายใน repo การบ้าน ส่วนงานโค้ดทั้งหมดของ Phase 0.2–0.9 ทำนอก repo นี้ prompt ของ session local เหล่านั้นไม่ได้ส่งมาให้ session นี้ จึงไม่ได้คัดลอกมาไว้ที่นี่ รอบนี้ทำ 7 อย่าง:
+  1. fast-forward branch รอบนี้ไปที่ commit รอบ 1 เพื่อเอา `output/design/` และบันทึกรอบ 1 กลับมา (ดู PROJECT_MEMORY รอบ 2)
+  2. เขียน `output/phase0/PHASE0_REPORT.md` เป็นรายงานหลักสำหรับผู้สอน ครอบคลุมโจทย์, สถาปัตยกรรม R3, แหล่งข้อมูลและ provenance, วิธีตรวจสอบ, ผลที่วัดได้จริง, ข้อค้นพบ, ข้อจำกัด, เหตุผล R2 กับ R3, แผน Phase 1, สิ่งที่ผู้สอนตรวจได้และตรวจไม่ได้, และคำถามถึงผู้สอน
+  3. คัดลอกรายงาน local ที่ sanitize แล้ว 2 ไฟล์ (checkpoint 0.9 และ submission preview) ไว้ที่ `output/phase0/source_reports/` โดยไม่แก้เนื้อหา แค่เติมหมายเหตุไว้หัวไฟล์
+  4. รวม memory entries Phase 0.3–0.9 ที่ผู้เรียนเตรียมไว้เข้า `PROJECT_MEMORY.md` และเพิ่มกฎใหม่ 12 ข้อโดยไม่ซ้ำกฎเดิม พร้อมตารางค่าจริงที่วัดได้
+  5. อัปเดต `spec.md`: สถานะ, แหล่ง 8-K, ไฟล์ output, ติ๊ก success criteria พร้อมผล, และเพิ่มการแก้ไข D4–D8 ในภาคผนวกโดยไม่แตะกฎ R3 เดิม
+  6. เขียน `help.md` 3 คำถามถึงผู้สอน
+  7. อัปเดต `output/README.md` และตารางใน `README.md`
+- **เครื่องมือ / model:** Claude Code (cloud session บน claude.ai/code) ใช้ model ตามการตั้งค่าของ session (นโยบายของ environment ไม่ให้ใส่ model ID ลงไฟล์ที่ push) · งาน Phase 0.2–0.9 ทำใน repo local บน Mac mini
+- **Prompt ที่ใช้:** prompt หลักของรอบนี้ ตัดทอนด้วย […] และตัด path ในเครื่องออกเพื่อความเป็นส่วนตัว
+
+```text
+AIA Coursework — Final Phase 0 Submission
+We have completed the local implementation and technical validation of US Fundamental Inflection Radar, R3 v0.1, on my Mac mini.
+This Claude Cloud session is the coursework and instructor-review workspace, NOT the primary development environment.
+The real application is maintained separately in a local-only repository: […]
+Do not assume you have access to that local repository. Use only the course repository and the Phase 0 reports / sanitized submission preview that I have explicitly provided to this cloud session.
+[…]
+Step 3 — Update the coursework deliverables
+Produce a clear, concise and instructor-reviewable final Phase 0 package.
+[…] Incorporate the supplied Phase 0 memory entries into the existing memory document, preserving meaningful prior content and avoiding duplicates. […]
+Make clear that this is technical validation, not investment-performance validation. The 30-company sample is purposive and cannot establish market-wide coverage or predictive performance.
+Do not claim the local source code is available for inspection unless it has actually been supplied or published.
+Step 4 — Public-content and privacy review […] Use the sanitized preview's manifest as the starting point. Do not publish the entire local development history.
+Do not overwrite the approved R3 design with old R2 scoring rules.
+Step 5 — Save according to course requirements […] This is my authorization to publish the finalized coursework update through that prescribed workflow. […]
+If essential source documents are missing, stop before publishing and identify exactly what I must provide. Do not invent missing results.
+```
+
+- **ผลที่ได้:**
+  - ได้ชุดส่งตรวจ Phase 0 ที่ผู้สอนอ่านจบได้ในไฟล์เดียว (`output/phase0/PHASE0_REPORT.md`) โดยตัวเลขทั้งหมดมาจาก checkpoint 0.9 และ submission preview ตามจริง ได้แก่:
+    - funnel 8,023 → 6,036 → 4,217 → 2,964
+    - facts 39,640 แถว, ตรงกับ SEC API 30/30
+    - reconciliation 240/240 และ lineage 338/338
+    - ความถูกต้องอิสระ 132 / 24 / 68 / 16
+    - ranking 11 บริษัท (P 7, G 2, T 2)
+    - gates G0.1–G0.14 ผ่าน
+    - 284 tests
+  - ดีตรงไหน: แยกความตรงทางคณิตศาสตร์ออกจากความถูกต้องอิสระชัดเจน ประกาศขอบเขตไว้ตั้งแต่ต้นรายงาน (technical validation, purposive sample, threshold provisional, ไม่ใช้ราคา) และบอกตรง ๆ ว่าผู้สอนตรวจโค้ดไม่ได้
+  - ยังขาด:
+    - โค้ด, tests, fixtures และ `coverage_report.json` / `phase0_summary.json` ฉบับเต็มยังอยู่ในเครื่อง ผู้สอนจึงตรวจซ้ำไม่ได้
+    - ยังไม่มีภาพหน้าจอหรือ dashboard (เป็นงาน Phase 1)
+    - เลขกลุ่มใน README ยังไม่ระบุ
+    - `prompts.md` มี 2 รอบ แต่ checklist ของคอร์สกำหนดอย่างน้อย 3 รอบ
+- **ตัดสินใจอะไร และเพราะอะไร:**
+  - **เผยแพร่เฉพาะรายงานที่ sanitize แล้ว ไม่เผยแพร่โค้ด:** ผู้เรียนกำหนดให้ repo โค้ดเป็น local-only และสั่งไม่ให้เผยแพร่ประวัติการพัฒนาทั้งหมด ส่วน repo การบ้านเป็น Public จึงใช้ MANIFEST ของ preview เป็นจุดเริ่ม แต่เอาเฉพาะเอกสาร ไม่เอาโค้ด
+  - **ไม่ต้องตัดสินเรื่องอีเมลใน `pyproject.toml` และเอกสาร R2 ต้นฉบับ:** MANIFEST ให้เจ้าของเป็นผู้ตัดสินสองเรื่องนี้ แต่ทั้งสองไฟล์ไม่ได้เข้า repo นี้ จึงยังไม่ต้องตัดสินในรอบนี้
+  - **fast-forward ไปที่ commit รอบ 1:** ผู้เรียนอ้างถึงเอกสารออกแบบ R3 ใน `output/design/` ซึ่งมีอยู่เฉพาะบน branch ของรอบ 1 ที่ยังไม่ merge การ fast-forward เก็บประวัติรอบ 1 ไว้ครบโดยไม่เขียนทับ และไม่ทำให้ design R3 ถูกแทนด้วยกฎ R2
+  - **เพิ่ม 8-K earnings release ใน Trust sources:** Phase 0.6 ใช้ 8-K ยืนยัน Q4 จริง และ 8-K อยู่บน SEC EDGAR จึงยังอยู่ในกติกา "SEC เท่านั้น" แต่ spec ต้องบอกให้ตรงกับสิ่งที่ทำจริง
+  - **ใช้ 284 tests ไม่ใช้ 281:** checkpoint 0.9 และผู้เรียนระบุ 284 ส่วน 281 ใน preview §7 เป็นค่าเก่า จึงใส่หมายเหตุไว้แทนการแก้ต้นฉบับ
+  - **เขียนรายงานหลักเป็นภาษาอังกฤษพร้อมสรุปไทย** (AI เลือก): รายงานต้นทางเป็นภาษาอังกฤษ การคงศัพท์และตัวเลขตามต้นฉบับช่วยลดความเสี่ยงที่ตัวเลขหรือความหมายจะคลาดเคลื่อนตอนแปล
+  - **ติ๊ก success criteria 6 ข้อจาก 7:** gate ที่ตรงกันผ่านตามรายงาน local แต่ติดป้ายว่าผ่านเฉพาะในขอบเขต purposive sample ส่วนข้อ Phase 1 (blind review) ยังไม่ทำ
+  - **คง R2 ไว้เป็น comparator เท่านั้น:** ตามที่อนุมัติในรอบ 1 เพราะ weighted score ของ R2 เป็นแบบ compensatory และไม่มีหลักฐานรองรับน้ำหนัก แต่ยังไม่มีข้อมูลพอจะพิสูจน์ว่า R3 ดีกว่า
+- **ขั้นต่อไป:**
+  1. รอคอมเมนต์ผู้สอนใน Issues (5–6 พ.ย.) และ Repair Clinic (7 พ.ย.)
+  2. เติมเลขกลุ่มใน README
+  3. เจ้าของตัดสินว่าจะเผยแพร่โค้ดหรือรายงาน JSON หรือไม่
+  4. ขอ authorization สำหรับ Phase 1: รัน U4–U8 ทั้งตลาด 2,964 บริษัท, วางแผน precision check, ทำ coverage report ทั้งตลาด, freeze thresholds ก่อน validation แล้วค่อยทำ dashboard
