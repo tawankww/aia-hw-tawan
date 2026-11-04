@@ -1,7 +1,7 @@
 # ติดตรงไหน 3 ข้อ
 
 > ผู้สอนอ่านไฟล์นี้ก่อนวันเสาร์ เพื่อเตรียมคำตอบให้คุณใน Repair Clinic เขียนให้เจาะจงที่สุด
-> บริบท: Phase 0 (technical validation) เสร็จแล้ว รายละเอียดอยู่ที่ `output/phase0/PHASE0_REPORT.md`
+> บริบท: Phase 0 (technical validation) เสร็จแล้ว (`output/phase0/PHASE0_REPORT.md`) · Phase 1 รันทั้ง U3 และมี dashboard ในเครื่องแล้ว (`output/submission/`)
 
 ## 1. Ranking แบบ threshold multiple ใช้เป็นค่า default ได้หรือยัง
 
@@ -15,8 +15,8 @@
 - **ลองทำอะไรไปแล้ว:** manual reconciliation 240 ค่า (10 กรณี × 8 ไตรมาส × 3 ตัวชี้วัด) เทียบงบที่พิมพ์ใน filing ผ่าน 240/240 และ lineage 338/338 แล้วแยกความถูกต้องอิสระออกจากความตรงทางคณิตศาสตร์
 - **เกิดอะไรขึ้นจริง:** มีตัวเลขไตรมาสที่บริษัทแสดงเองตรงงวด 132 ค่า, ค่าที่ derive แล้วมี earnings release ยืนยัน 24, ค่าที่ถูกตามกฎแต่ไม่มีตัวเลขอิสระยืนยัน 68 และค่าที่ pipeline ปฏิเสธ 16 · ใน 58 strict failures มี 9 ค่าที่ยอมรับเป็นการปัดเศษ, 47 ค่ายัง fail และ 2 ค่าตรวจ precision ไม่ได้ **คำถาม:** การแยก 132/24/68/16 เป็นมาตรฐานที่เหมาะหรือไม่ และค่า 68 ค่าที่ "ถูกตามกฎเท่านั้น" (derive จาก YTD หรือปีงบ โดยไม่มีตัวเลขรายไตรมาสอิสระยืนยัน) ควรใช้จัดอันดับได้เลย หรือต้องติดป้าย/ลดน้ำหนักความเชื่อมั่น
 
-## 3. แผน Phase 1: เติมข้อมูล risk ก่อน หรือรันทั้งตลาดก่อน
+## 3. รันทั้งตลาดแล้ว ข้อมูล risk "ไม่ทราบ" ยังเยอะ: ควรเติมแหล่งข้อมูล หรือยอมรับ unknown
 
-- **อยากให้เกิดอะไร:** รัน 2,964 บริษัท (U3) ทั้งตลาดแล้วได้ risk tier ที่มีความหมาย
-- **ลองทำอะไรไปแล้ว:** ใช้ 4 debt states (unknown ไม่เปลี่ยน tier), แสดง risk completeness แยก, เพิ่ม fallback tag หนี้ (D6) และใช้คำว่า "no triggered flags — complete/incomplete inputs" แทน "ความเสี่ยงต่ำ"
-- **เกิดอะไรขึ้นจริง:** ใน 21 core บริษัท risk inputs ไม่ครบ 11 ตัว, interest expense หายที่ไตรมาส t 18 ตัว, special items ปีฐานไม่ทราบ 15 ตัว · ใน U3 pool มี tag หนี้แค่ 67.5% และหนี้/finance lease ที่รายงานแบบ dimension มองไม่เห็นใน companyfacts **คำถาม:** ควรเพิ่มแหล่งข้อมูล guard (เช่น dimensional XBRL จาก filing ต้นฉบับ) ก่อนรันทั้งตลาด หรือรันก่อนแล้ววัด attrition ต่อกฎ และการ validate โดยไม่ใช้ราคา (blind owner review + persistence แบบ exploratory) ถือเป็นเกณฑ์ผ่านที่ยอมรับได้หรือไม่
+- **อยากให้เกิดอะไร:** risk tier ของทั้ง U3 มีความหมาย ไม่ใช่ "ไม่มี flag" เพียงเพราะข้อมูลไม่ครบ
+- **ลองทำอะไรไปแล้ว:** ใช้ 4 debt states (unknown ไม่เปลี่ยน tier), แสดง risk completeness แยก, เพิ่ม fallback tag หนี้ (D6), ใช้คำว่า "no triggered flags — complete/incomplete inputs" แทน "ความเสี่ยงต่ำ" แล้วรันทั้ง U3 2,964 บริษัทบน run ที่ freeze แล้ว (ตัวเลขใน `output/submission/COVERAGE_SUMMARY.md`)
+- **เกิดอะไรขึ้นจริง:** ใน core 1,571 บริษัท หนี้ไม่ทราบ 384 (+ partial_zero 23 ที่นับเป็นไม่ทราบ), risk inputs ครบ 2/2 แค่ 677, special items ปีฐานครบทุก tag แค่ 5 บริษัท · สาเหตุหลักคือหนี้และ finance lease ที่รายงานแบบมี XBRL dimension ไม่อยู่ใน companyfacts **คำถาม:** ควรเพิ่มแหล่งข้อมูล dimensional XBRL จาก filing ต้นฉบับ (ต้องดาวน์โหลดเพิ่มมาก) หรือยอมรับ unknown แล้วให้ผู้ใช้กรองเอง และการ validate โดยไม่ใช้ราคา (blind owner review บนข้อมูลตั้งแต่ 2027-02-01 + persistence แบบ exploratory) ถือเป็นเกณฑ์ผ่านที่ยอมรับได้หรือไม่

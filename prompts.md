@@ -129,3 +129,50 @@ If essential source documents are missing, stop before publishing and identify e
   2. เติมเลขกลุ่มใน README
   3. เจ้าของตัดสินว่าจะเผยแพร่โค้ดหรือรายงาน JSON หรือไม่
   4. ขอ authorization สำหรับ Phase 1: รัน U4–U8 ทั้งตลาด 2,964 บริษัท, วางแผน precision check, ทำ coverage report ทั้งตลาด, freeze thresholds ก่อน validation แล้วค่อยทำ dashboard
+
+---
+
+## รอบ 3 · 2026-11-04
+
+- **ทำอะไร:** เตรียมชุดส่งตรวจฉบับสุดท้ายจากระบบที่ทำงานจริงใน repo local โดยไม่ดาวน์โหลดข้อมูลใหม่และไม่แก้โมเดล
+  1. รวมงานที่กระจายอยู่ 3 branch: fast-forward `main` → รอบ 1 → รอบ 2 (สายเดียวกัน ไม่มี merge commit ไม่เขียนประวัติใหม่)
+  2. สร้าง `output/submission/sample30_evidence.csv` ด้วยสคริปต์จาก run R3 v0.1 baseline ที่ freeze แล้ว (SEC snapshot 2026-10-31) สำหรับ 30 บริษัทของ sample Phase 0.4 เดิม แล้ว cross-check กับผล Phase 0.8 และผล manual reconciliation Phase 0.6
+  3. ถ่ายภาพหน้าจอจริง 3 ภาพจาก dashboard ในเครื่องที่เปิดบน run baseline (Discovery Board, Company Profile ของ Federal Signal พร้อม reconciliation และรายการ filing, Coverage & freshness) ติดป้ายว่าเป็นแอปในเครื่องและข้อมูลย้อนหลัง
+  4. เขียน `METHODOLOGY.md`, `COVERAGE_SUMMARY.md` และ `VERIFICATION.md` · อัปเดต `README.md` (อ่านจบใน 30–60 วินาที), `spec.md` (สถานะ Phase 1 ตามจริง, คง 5 หัวข้อ), `PROJECT_MEMORY.md` (บทเรียน Phase 1 และรอบนี้), `help.md`
+- **เครื่องมือ / model:** Claude Code (Claude desktop app, แท็บ Code บน Mac mini) model Claude Opus 5.5 · Python/pandas อ่าน Parquet ของ run · headless Chrome ถ่ายภาพหน้าจอ · งาน Phase 1 ก่อนหน้า (2026-11-01 ถึง 11-04) ทำใน session local หลายรอบ ซึ่งสรุปจาก checkpoint และ decision log ของ repo local ไว้ใน `PROJECT_MEMORY.md` ไม่ได้คัดลอก prompt ของ session เหล่านั้นมา
+- **Prompt ที่ใช้:** prompt หลักของรอบนี้ ตัดทอนด้วย […]
+
+```text
+Fundamental Inflection Radar — Prepare AI Investor Alpha Homework Submission
+[…]
+New priority: prepare the coursework submission due November 4, 2026, 21:00 Asia/Bangkok.
+[…]
+Objective
+Create a compact, professional submission that demonstrates a working, reproducible US Fundamental Inflection Radar using real SEC EDGAR data.
+[…]
+3. Use the existing verified SEC financial snapshot, preferably the frozen October 31, 2026 baseline. Do not trigger a new SEC download, refresh, promotion or financial-model change.
+4. Select approximately 30 real companies using a documented, deterministic and defensible selection method.
+5. Include examples of P, G, T, W and missing/uncertain-data cases when present. Do not artificially assign categories or cherry-pick companies to make the model look successful.
+[…]
+7. Report which examples have independently reconciled SEC filing data. Do not imply that all 30 companies were manually reconciled if that has not happened.
+[…]
+Do not create fake financial numbers, simulated research findings or misleading AI-generated dashboard images.
+[…]
+Stop before pushing to the public repository and request my approval of the final public diff.
+```
+
+- **ผลที่ได้:**
+  - CSV 30 แถว: P 13 (ได้อันดับ 7) · G 2 · T 2 · W 4 · ประวัติสั้น 3 · excluded 6 (negative controls 3 ถูกตัดถูกเหตุผล)
+  - 25 บริษัทที่อยู่ใน U3 ให้ผลใน run ทั้งตลาดตรงกับ sample run ของ Phase 0.8 ทุกตัว (class, primary path, multiple, evidence, tier) · อีก 5 อยู่นอก U3 โดยการออกแบบ
+  - ระบุชัดว่า reconcile ด้วยมือแค่ 10 จาก 30 บริษัท และใน 7 บริษัท P ที่ได้อันดับ มีแค่ FSS ที่ reconcile แล้ว
+  - ตัวเลขในภาพหน้าจอของ Federal Signal (ตำแหน่ง 242 จาก 474, strength 1.9×, revenue TTM +24%) ตรงกับแถวใน CSV
+  - เติมเลขกลุ่มใน README เป็น Group 2 (g02) ตามที่เจ้าของแจ้ง (ชื่อ repo `aia-hw-tawan` คงเดิม)
+  - ยังขาด: ส่งหลัง 21:00
+- **ตัดสินใจอะไร และเพราะอะไร:**
+  - **ใช้ sample 30 บริษัทเดิมของ Phase 0.4 ไม่คัดใหม่:** sample นี้เลือกด้วยกฎ deterministic และ seed คงที่ก่อนเห็นผล ranking การคัดใหม่ตอนนี้จะเลือกได้จากผลที่เห็นแล้ว ซึ่งเสี่ยง cherry-pick ตามที่ prompt ห้าม
+  - **ใช้ run baseline ที่ freeze แล้ว ไม่ใช้ run `cal16v1` ที่ dashboard ใช้เป็นค่า default:** prompt ระบุให้ใช้ baseline 31 ต.ค. และ baseline คือ reference ที่ไม่เปลี่ยน ภาพหน้าจอจึงเปิด dashboard ด้วย run เดียวกัน เพื่อให้ตัวเลขในภาพกับ CSV ตรงกัน
+  - **รายงานอันดับเป็น "ตำแหน่งในคลาสของทั้ง U3":** อันดับภายใน 30 บริษัทไม่มีความหมายสำหรับผู้ใช้จริง ส่วนตำแหน่งในทั้ง U3 คือสิ่งที่ dashboard แสดง
+  - **ไม่ใช้ภาพหน้า Update Center:** หน้านั้นแสดงชื่อไฟล์ config ในเครื่องและสถานะ backup ภายใน จึงใช้หน้า Data & Methods ซึ่งแสดง coverage และ freshness แทน
+  - **ไม่ทำ visual walkthrough หน้าเดียว (optional):** เลย deadline แล้ว จึงใส่ลำดับการทำงานเป็นข้อความใน README แทน
+- **ขั้นต่อไป:**
+  1. รอคอมเมนต์ผู้สอนใน Issues และ Repair Clinic (7 พ.ย.)

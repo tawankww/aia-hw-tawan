@@ -1,8 +1,8 @@
 ---
 title: US Fundamental Inflection Radar
 owner: Tawan
-status: phase-0-complete (technical validation) · phase-1-not-started
-updated: 2026-11-01
+status: phase-0-complete (technical validation) · phase-1-running-locally (full U3 run + read-only dashboard) · model-quality-not-validated
+updated: 2026-11-04
 ---
 
 # Spec
@@ -10,6 +10,7 @@ updated: 2026-11-01
 > เครื่องมือคัดกรองหุ้นสหรัฐทั้งตลาดจาก SEC EDGAR เพื่อหา "บริษัทที่พื้นฐานกำลังเปลี่ยนไปในทางที่ดีขึ้น" (fundamental inflection) แล้วส่งต่อไปทำ deep research ที่อื่น ไม่ใช่เครื่องมือ valuation ไม่ใช่เครื่องมือเทรด ไม่ใช้ราคาหุ้น
 > แผนฉบับเต็ม: R2 (data engineering) + R3 v0.1 (scoring) — สรุปกฎไว้ในภาคผนวกท้ายไฟล์นี้; โค้ดอยู่ใน repo แยก `fundamental-inflection-radar` (local, Mac mini, **ไม่ได้เผยแพร่**)
 > **สถานะ 2026-11-01:** Phase 0 (technical validation บนข้อมูล SEC จริง snapshot 2026-10-31) เสร็จแล้ว ผลอยู่ที่ `output/phase0/PHASE0_REPORT.md` · เป็นการตรวจ pipeline และกลไกโมเดลเท่านั้น ไม่ใช่หลักฐานคุณภาพโมเดลหรือผลตอบแทนการลงทุน
+> **สถานะ 2026-11-04:** threshold ของ R3 v0.1 ถูก freeze (2026-11-01T09:20Z) แล้วรันทั้ง U3 2,964 บริษัทบน snapshot เดิม (core 1,571 · ได้อันดับ 705) และมี dashboard Streamlit แบบ read-only ในเครื่อง · ชุดส่งตรวจอยู่ที่ `output/submission/` · ยังไม่ได้ validate คุณภาพโมเดล
 
 ## 1. Goal · อยากตัดสินใจเรื่องอะไร
 
@@ -40,7 +41,8 @@ updated: 2026-11-01
 
 - **Phase 0 (ฉบับตรวจ 4 พ.ย.) — เสร็จแล้ว 2026-11-01:** pipeline จริงบน 30 บริษัทตัวอย่าง (purposive sample ไม่ใช่ตัวแทนตลาด), manual reconciliation 8–10 บริษัทเทียบ filing ต้นฉบับ, ตาราง scores ตัวอย่าง, coverage report ตัวอย่างที่ติดป้ายชัดว่าเป็น sample ไม่ใช่ตลาด
 - **Phase 1 (MVP):** dashboard Streamlit 4 หน้า (Rankings มี views P / G / T / Watch / Provisional / Excluded · Company quick view พร้อม provenance ถึง fact ดิบ · Coverage & Freshness · About-limitations) + `shortlist.csv` + `run_meta.json`
-- ไฟล์ใน repo การบ้าน: `spec.md`, `prompts.md`, `PROJECT_MEMORY.md`, `help.md`, `output/design/` (เอกสารออกแบบ), `output/phase0/PHASE0_REPORT.md` (รายงาน Phase 0: funnel, gates, ranking ตัวอย่าง, coverage highlights), `output/phase0/source_reports/` (สำเนารายงาน local ที่ sanitize แล้ว) · โค้ด, tests, `coverage_report.json` ฉบับเต็ม และข้อมูล SEC อยู่ repo local แยก ไม่ได้เผยแพร่
+  - *สถานะ 2026-11-04 (ทำงานใน repo local):* รันทั้ง U3 บน run ที่ freeze แล้ว · dashboard read-only มีหน้า Discovery Board (P / G / T), Company Profile (ตัวเลข TTM, เส้นทาง, evidence, risk, reconciliation, รายการ SEC filing), Compare, Data & Methods (coverage, freshness, data quality), Update Center และคู่มือภาษาไทย · ยังไม่มี scheduled refresh (ทุกอย่างอ่านจาก snapshot 2026-10-31) · `shortlist.csv` ของชุดส่งตรวจ = `output/submission/sample30_evidence.csv` (30 บริษัทจาก sample เดิม ไม่ใช่ shortlist รายเดือน)
+- ไฟล์ใน repo การบ้าน: `spec.md`, `prompts.md`, `PROJECT_MEMORY.md`, `help.md`, `output/submission/` (CSV 30 บริษัท, coverage summary, methodology, ภาพหน้าจอ 3 ภาพ), `output/design/` (เอกสารออกแบบ), `output/phase0/PHASE0_REPORT.md` (รายงาน Phase 0: funnel, gates, ranking ตัวอย่าง, coverage highlights), `output/phase0/source_reports/` (สำเนารายงาน local ที่ sanitize แล้ว) · โค้ด, tests, `coverage_report.json` ฉบับเต็ม และข้อมูล SEC อยู่ repo local แยก ไม่ได้เผยแพร่
 
 ## 5. Success criteria · รู้ได้อย่างไรว่างานผ่าน
 
@@ -52,7 +54,9 @@ updated: 2026-11-01
 - [x] ข้อมูลที่หาย (หนี้, special items, ประวัติ 12 ไตรมาส) แสดงเป็น "ไม่ทราบ" ไม่ถูกตีความเป็นบวกหรือลบ และมีคอลัมน์ completeness — *ผล: G0.11 ผ่าน; risk แสดงเป็น "no triggered flags — complete/incomplete inputs"*
 - [x] ลำดับของบริษัทหนึ่ง (ranking key) ไม่เปลี่ยนเมื่อเพิ่ม/ลบบริษัทอื่นใน universe; รัน 2 ครั้งจากข้อมูลดิบเดียวกันได้ผลเหมือนกัน — *ผล: G0.12 ผ่าน (0 key change, 0 pairwise change); รายงาน byte-identical*
 - [x] coverage report แสดง funnel ทุกขั้น, coverage ของทุก tag ที่ใช้, และจำนวนบริษัทที่หาย/ถูกลดอันดับต่อกฎ; ไม่มีคำว่า full-market coverage / point-in-time / backtest ในเอกสาร (ยกเว้นในข้อความที่ประกาศข้อจำกัด) — *ผล: G0.14 ผ่าน*
-- [ ] (Phase 1) blind review ของ shortlist 20 ตัว: เจ้าของให้ "ควรศึกษาต่อ" ได้โดยอ่าน card มาตรฐาน และ persistence ถูกรายงานเทียบ base rate พร้อมข้อจำกัด (exploratory เท่านั้น)
+> สถานะ 2026-11-04 (Phase 1, ทั้ง U3): ผลของ 25 บริษัทใน sample ที่อยู่ใน U3 ใน run baseline ทั้งตลาดตรงกับ sample run ของ Phase 0.8 ทุกตัว (class, เส้นทาง, multiple, evidence, tier) ซึ่งสอดคล้องกับข้อ ranking-key invariance ด้านบน · รายละเอียด `output/submission/METHODOLOGY.md`
+
+- [ ] (Phase 1) blind review ของ shortlist 20 ตัว: เจ้าของให้ "ควรศึกษาต่อ" ได้โดยอ่าน card มาตรฐาน และ persistence ถูกรายงานเทียบ base rate พร้อมข้อจำกัด (exploratory เท่านั้น) — *ยังไม่ทำ: ออกแบบ protocol แล้ว การ review ทางการกำหนดบน snapshot ที่ลงวันที่ตั้งแต่ 2027-02-01 เพื่อไม่ให้ผู้ review เห็นผลก่อน*
 
 ---
 
